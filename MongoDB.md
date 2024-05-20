@@ -38,15 +38,15 @@ MongoDB è un sistema di gestione di database NoSQL orientato ai documenti, prog
     - Esempio di documento: 
     
 ```json
-	    { 
-		    "_id": 1, 
-		    "nome": "Mario Rossi", 
-		    "età": 30, 
-		    "indirizzo": { 
-			    "via": "Via Roma", 
-			    "numero": 42, 
-			    "città": "Milano" 
-			  } 
-			}
+{ 
+	"_id": 1, 
+	"nome": "Mario Rossi", 
+	"età": 30, 
+	"indirizzo": { 
+		"via": "Via Roma", 
+		"numero": 42, 
+		"città": "Milano" 
+	} 
+}
 ```
 
