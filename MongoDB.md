@@ -42,16 +42,16 @@ MongoDB è un sistema di gestione di database NoSQL orientato ai documenti, prog
     - Esempio di documento: 
   
 ```json
-{
-	"_id": 1, 
-	"nome": "Mario Rossi", 
-	"età": 30, 
-	"indirizzo": { 
-		"via": "Via Roma", 
-		"numero": 42, 
-		"città": "Milano" 
+	{
+		"_id": 1, 
+		"nome": "Mario Rossi", 
+		"età": 30, 
+		"indirizzo": { 
+			"via": "Via Roma", 
+			"numero": 42, 
+			"città": "Milano" 
+		}
 	}
-}
 ```
 
 ---
@@ -176,8 +176,186 @@ In questo schema, ogni ordine contiene solo i riferimenti (gli ID) ai prodotti. 
 La scelta tra embedding e referencing dipende quindi dalle esigenze specifiche dell'applicazione, dal tipo di accesso ai dati, dalle dimensioni dei documenti e dalla frequenza degli aggiornamenti.
 
 ---
+## Operazioni CRUD su MongoDB
 
-## 
+#### Create
+
+Le operazioni di creazione in MongoDB aggiungono nuovi documenti a una collezione.
+
+1. **`insertOne`**:
+   Inserisce un singolo documento nella collezione.
+   ```json
+   db.collection.insertOne({
+     name: "Mario Rossi",
+     age: 30,
+     address: {
+       street: "Via Roma",
+       city: "Milano"
+     }
+   });
+   ```
+
+2. **`insertMany`**:
+   Inserisce più documenti nella collezione.
+   ```json
+   db.collection.insertMany([
+     {
+       name: "Luigi Bianchi",
+       age: 25,
+       address: {
+         street: "Via Milano",
+         city: "Roma"
+       }
+     },
+     {
+       name: "Anna Verdi",
+       age: 40,
+       address: {
+         street: "Via Napoli",
+         city: "Napoli"
+       }
+     }
+   ]);
+   ```
+
+#### Read
+
+Le operazioni di lettura in MongoDB recuperano documenti da una collezione.
+
+1. **`find`**:
+   Recupera uno o più documenti che corrispondono a un criterio di ricerca.
+   ```json
+   db.collection.find({ age: { $gt: 20 } });
+   ```
+
+2. **`findOne`**:
+   Recupera un singolo documento che corrisponde a un criterio di ricerca.
+   ```json
+   db.collection.findOne({ name: "Mario Rossi" });
+   ```
+
+3. **`countDocuments`**:
+   Conta il numero di documenti che corrispondono a un criterio di ricerca.
+   ```json
+   db.collection.countDocuments({ age: { $gt: 20 } });
+   ```
+
+4. **`distinct`**:
+   Restituisce i valori distinti di un campo specifico.
+   ```json
+   db.collection.distinct("city");
+   ```
+
+#### Update
+
+Le operazioni di aggiornamento in MongoDB modificano i documenti esistenti in una collezione.
+
+1. **`updateOne`**:
+   Aggiorna un singolo documento che corrisponde a un criterio di ricerca.
+   ```json
+   db.collection.updateOne(
+     { name: "Mario Rossi" },
+     { $set: { age: 31 } }
+   );
+   ```
+
+2. **`updateMany`**:
+   Aggiorna tutti i documenti che corrispondono a un criterio di ricerca.
+   ```json
+   db.collection.updateMany(
+     { city: "Milano" },
+     { $set: { city: "Rome" } }
+   );
+   ```
+
+3. **`replaceOne`**:
+   Sostituisce un singolo documento che corrisponde a un criterio di ricerca con un nuovo documento.
+   ```json
+   db.collection.replaceOne(
+     { name: "Mario Rossi" },
+     {
+       name: "Mario Rossi",
+       age: 31,
+       address: {
+         street: "Via Roma",
+         city: "Roma"
+       }
+     }
+   );
+   ```
+
+#### Delete
+
+Le operazioni di cancellazione in MongoDB rimuovono documenti da una collezione.
+
+1. **`deleteOne`**:
+   Cancella un singolo documento che corrisponde a un criterio di ricerca.
+   ```json
+   db.collection.deleteOne({ name: "Mario Rossi" });
+   ```
+
+2. **`deleteMany`**:
+   Cancella tutti i documenti che corrispondono a un criterio di ricerca.
+   ```json
+   db.collection.deleteMany({ age: { $lt: 25 } });
+   ```
+
+### Pipeline e Aggregazione
+
+La pipeline di aggregazione in MongoDB è una potente operazione che consente di eseguire trasformazioni e aggregazioni su un set di dati. Una pipeline è composta da più fasi, dove ogni fase trasforma i documenti e passa i risultati alla fase successiva.
+
+| Operazione di Pipeline | Descrizione                                                                                                                     | Esempio                                                                                                                                                                                                            |
+| :--------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$match`               | Filtra i documenti in ingresso per farli corrispondere a una condizione.                                                        | `{ $match: { status: "A" } }`                                                                                                                                                                                      |
+| `$group`               | Raggruppa i documenti in base a un campo specifico e può eseguire operazioni di aggregazione come somma, media, conteggio, ecc. | `{ $group: { _id: "$city", total: { $sum: "$amount" } } }`                                                                                                                                                         |
+| `$project`             | Modifica la struttura dei documenti, inclusi, esclusi o rinominando campi.                                                      | `{ $project: { name: 1, age: 1, city: 1 } }`                                                                                                                                                                       |
+| `$sort`                | Ordina i documenti in base a un campo specifico.                                                                                | `{ $sort: { age: -1 } }`                                                                                                                                                                                           |
+| `$limit`               | Limita il numero di documenti in uscita.                                                                                        | `{ $limit: 5 }`                                                                                                                                                                                                    |
+| `$skip`                | Salta un numero specifico di documenti.                                                                                         | `{ $skip: 10 }`                                                                                                                                                                                                    |
+| `$unwind`              | Decompone un array in più documenti, uno per ogni elemento dell'array.                                                          | `{ $unwind: "$items" }`                                                                                                                                                                                            |
+| `$lookup`              | Unisce documenti da un'altra collezione (join).                                                                                 | `{ $lookup: { from: "products", localField: "product_id", foreignField: "_id", as: "productDetails" } }`                                                                                                           |
+| `$out`                 | Scrive i risultati della pipeline in una nuova collezione.                                                                      | `{ $out: "newCollection" }`                                                                                                                                                                                        |
+| `$merge`               | Unisce i risultati della pipeline in una collezione esistente.                                                                  | `{ $merge: { into: "targetCollection", whenMatched: "merge", whenNotMatched: "insert" } }`                                                                                                                         |
+| `$addFields`           | Aggiunge nuovi campi ai documenti.                                                                                              | `{ $addFields: { totalCost: { $sum: ["$price", "$tax"] } } }`                                                                                                                                                      |
+| `$set`                 | Sinonimo di `$addFields`, utilizzato per aggiungere o aggiornare campi.                                                         | `{ $set: { totalCost: { $sum: ["$price", "$tax"] } } }`                                                                                                                                                            |
+| `$replaceRoot`         | Sostituisce il documento corrente con un documento specificato.                                                                 | `{ $replaceRoot: { newRoot: "$newDocument" } }`                                                                                                                                                                    |
+| `$count`               | Conta il numero di documenti che attraversano la pipeline.                                                                      | `{ $count: "totalDocuments" }`                                                                                                                                                                                     |
+| `$facet`               | Esegue operazioni di aggregazione multiple in parallelo e restituisce i risultati in un unico documento.                        | `{ $facet: { "categorizedByPrice": [ { $bucket: { groupBy: "$price", boundaries: [ 0, 100, 200, 300 ], default: "Other" } } ] } }`                                                                                 |
+| `$bucket`              | Raggruppa i documenti in base a un intervallo di valori specificato.                                                            | `{ $bucket: { groupBy: "$price", boundaries: [ 0, 100, 200 ], default: "Other", output: { "count": { $sum: 1 } } } }`                                                                                              |
+| `$bucketAuto`          | Raggruppa i documenti in un numero specifico di bucket con intervalli di valori distribuiti automaticamente.                    | `{ $bucketAuto: { groupBy: "$price", buckets: 4 } }`                                                                                                                                                               |
+| `$sortByCount`         | Raggruppa i documenti per un campo specificato e conta il numero di documenti in ogni gruppo, ordinandoli per conteggio.        | `{ $sortByCount: "$category" }`                                                                                                                                                                                    |
+| `$geoNear`             | Effettua una ricerca geografica nei documenti.                                                                                  | `{ $geoNear: { near: { type: "Point", coordinates: [ -73.99279 , 40.719296 ] }, distanceField: "dist.calculated", maxDistance: 2, query: { category: "Parks" }, includeLocs: "dist.location", spherical: true } }` |
+| `$redact`              | Utilizzato per controllare l'accesso ai dati a livello di documento.                                                            | `{ $redact: { $cond: { if: { $gt: ["$level", 5] }, then: "$$DESCEND", else: "$$PRUNE" } } }`                                                                                                                       |
+| `$sample`              | Estrae un numero casuale di documenti dalla collezione.                                                                         | `{ $sample: { size: 3 } }`                                                                                                                                                                                         |
+| `$indexStats`          | Restituisce statistiche sugli indici utilizzati nella collezione.                                                               | `{ $indexStats: {} }`                                                                                                                                                                                              |
+| `$addToSet`            | Aggiunge valori a un array solo se non sono già presenti.                                                                       | `{ $group: { _id: "$_id", uniqueValues: { $addToSet: "$value" } } }`                                                                                                                                               |
+
+#### Esempio di Pipeline Completa 
+
+Supponiamo di avere una collezione di ordini e vogliamo ottenere il totale delle vendite per ogni città, ordinato per totale in modo decrescente.
+
+```json
+db.orders.aggregate([
+  { $match: { status: "completed" } },
+  { $unwind: "$items" },
+  { $group: { _id: "$city", totalSales: { $sum: "$items.price" } } },
+  { $sort: { totalSales: -1 } },
+  { $project: { _id: 0, city: "$_id", totalSales: 1 } }
+]);
+```
+
+In questa pipeline:
+
+1. **`$match`** filtra gli ordini con stato "completed".
+2. **`$unwind`** decompone l'array "items" in documenti individuali.
+3. **`$group`** raggruppa i documenti per città e calcola il totale delle vendite.
+4. **`$sort`** ordina i risultati in base al totale delle vendite in ordine decrescente.
+5. **`$project`** ristruttura i documenti per includere solo la città e il totale delle vendite.
+
+L'aggregazione di MongoDB è uno strumento potente che permette di eseguire analisi complesse sui dati direttamente all'interno del database, riducendo la necessità di elaborazione lato applicazione.
+
+---
+## Ottimizzazione Delle Query
 
 
 
