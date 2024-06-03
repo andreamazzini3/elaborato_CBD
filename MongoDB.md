@@ -184,7 +184,7 @@ Le operazioni di creazione in MongoDB aggiungono nuovi documenti a una collezion
 
 1. **`insertOne`**:
    Inserisce un singolo documento nella collezione.
-   ```json
+   ```js
    db.collection.insertOne({
      name: "Mario Rossi",
      age: 30,
@@ -197,7 +197,7 @@ Le operazioni di creazione in MongoDB aggiungono nuovi documenti a una collezion
 
 2. **`insertMany`**:
    Inserisce più documenti nella collezione.
-   ```json
+   ```js
    db.collection.insertMany([
      {
        name: "Luigi Bianchi",
@@ -224,25 +224,25 @@ Le operazioni di lettura in MongoDB recuperano documenti da una collezione.
 
 1. **`find`**:
    Recupera uno o più documenti che corrispondono a un criterio di ricerca.
-   ```json
+   ```js
    db.collection.find({ age: { $gt: 20 } });
    ```
 
 2. **`findOne`**:
    Recupera un singolo documento che corrisponde a un criterio di ricerca.
-   ```json
-   db.collection.findOne({ name: "Mario Rossi" });
+   ```js
+	 db.collection.findOne({ name: "Mario Rossi" });
    ```
 
 3. **`countDocuments`**:
    Conta il numero di documenti che corrispondono a un criterio di ricerca.
-   ```json
+   ```js
    db.collection.countDocuments({ age: { $gt: 20 } });
    ```
 
 4. **`distinct`**:
    Restituisce i valori distinti di un campo specifico.
-   ```json
+   ```js
    db.collection.distinct("city");
    ```
 
@@ -252,7 +252,7 @@ Le operazioni di aggiornamento in MongoDB modificano i documenti esistenti in un
 
 1. **`updateOne`**:
    Aggiorna un singolo documento che corrisponde a un criterio di ricerca.
-   ```json
+   ```js
    db.collection.updateOne(
      { name: "Mario Rossi" },
      { $set: { age: 31 } }
@@ -261,7 +261,7 @@ Le operazioni di aggiornamento in MongoDB modificano i documenti esistenti in un
 
 2. **`updateMany`**:
    Aggiorna tutti i documenti che corrispondono a un criterio di ricerca.
-   ```json
+   ```js
    db.collection.updateMany(
      { city: "Milano" },
      { $set: { city: "Rome" } }
@@ -270,7 +270,7 @@ Le operazioni di aggiornamento in MongoDB modificano i documenti esistenti in un
 
 3. **`replaceOne`**:
    Sostituisce un singolo documento che corrisponde a un criterio di ricerca con un nuovo documento.
-   ```json
+   ```js
    db.collection.replaceOne(
      { name: "Mario Rossi" },
      {
@@ -290,13 +290,13 @@ Le operazioni di cancellazione in MongoDB rimuovono documenti da una collezione.
 
 1. **`deleteOne`**:
    Cancella un singolo documento che corrisponde a un criterio di ricerca.
-   ```json
+   ```js
    db.collection.deleteOne({ name: "Mario Rossi" });
    ```
 
 2. **`deleteMany`**:
    Cancella tutti i documenti che corrispondono a un criterio di ricerca.
-   ```json
+   ```js
    db.collection.deleteMany({ age: { $lt: 25 } });
    ```
 
