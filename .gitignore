@@ -1,0 +1,11 @@
+data/
+.idea/
+.vscode/
+Thumbs.db
+
+# igore jsonfile
+general_contract_db*.*
+combined_*.*
+
+#ignore docker 
+docker*
