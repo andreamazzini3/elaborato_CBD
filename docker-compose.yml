@@ -1,0 +1,18 @@
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/var/lib/mongodb/data/
+
+  mongo_setup:
+    image: mongo:latest
+    depends_on:
+      - mongodb
+    restart: "no"
+
+volumes:
+  mongodb_data:
