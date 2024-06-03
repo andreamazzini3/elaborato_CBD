@@ -5,12 +5,12 @@
 
 ## Intro:
 
-MongoDB è un sistema di gestione di database NoSQL orientato ai documenti, progettato per gestire grandi volumi di dati non strutturati o semi-strutturati. A differenza dei database relazionali tradizionali che utilizzano tabelle e righe, MongoDB utilizza documenti BSON (Binary JSON) e collezioni per memorizzare i dati.
+MongoDB è un sistema di gestione di database NoSQL orientato ai documenti, progettato per gestire grandi volumi di dati non strutturati o semi-strutturati. A differenza dei database relazionali tradizionali che utilizzano tabelle e righe, MongoDB utilizza documenti BSON (Binary json) e collezioni per memorizzare i dati.
 
 ### Caratteristiche Principali di MongoDB
 
 1. **Orientato ai Documenti**:
-    - MongoDB memorizza i dati in documenti BSON, che sono simili ai documenti JSON. Questo permette di avere strutture dati flessibili e nidificate.
+    - MongoDB memorizza i dati in documenti BSON, che sono simili ai documenti json. Questo permette di avere strutture dati flessibili e nidificate.
 
 2. **Scalabilità Orizzontale**:  
 	- MongoDB supporta la shardizzazione, una tecnica che consente di distribuire i dati su più server per garantire alte prestazioni e scalabilità.
@@ -37,11 +37,11 @@ MongoDB è un sistema di gestione di database NoSQL orientato ai documenti, prog
 
 3. **Documento**:
     - Un Documento è l'unità base di dati in MongoDB, simile a una riga in una tabella relazionale.
-    - Memorizzato in formato BSON (Binary JSON).
+    - Memorizzato in formato BSON (Binary json).
     - I documenti possono avere strutture nidificate e incorporare array e oggetti.
     - Esempio di documento: 
   
-```json
+```js
 	{
 		"_id": 1, 
 		"nome": "Mario Rossi", 
@@ -68,7 +68,7 @@ Immaginiamo di avere un'applicazione che gestisce ordini di acquisto. Ogni ordin
 
 **Schema:**
 
-```json
+```js
 {
   "_id": ObjectId("60c5c5f3f1b22c1d2a5e5b78"),
   "customer": {
@@ -114,7 +114,7 @@ Utilizziamo lo stesso esempio degli ordini e prodotti, ma questa volta utilizzer
 
 **Schema Ordine:**
 
-```json
+```js
 {
   "_id": ObjectId("60c5c5f3f1b22c1d2a5e5b78"),
   "customer": {
@@ -132,7 +132,7 @@ Utilizziamo lo stesso esempio degli ordini e prodotti, ma questa volta utilizzer
 
 **Schema Prodotto:**
 
-```json
+```js
 {
   "_id": ObjectId("60c5c5f3f1b22c1d2a5e5b79"),
   "productName": "Laptop",
@@ -141,7 +141,7 @@ Utilizziamo lo stesso esempio degli ordini e prodotti, ma questa volta utilizzer
 }
 ```
 
-```json
+```js
 {
   "_id": ObjectId("60c5c5f3f1b22c1d2a5e5b7a"),
   "productName": "Mouse",
@@ -334,7 +334,7 @@ La pipeline di aggregazione in MongoDB è una potente operazione che consente di
 
 Supponiamo di avere una collezione di ordini e vogliamo ottenere il totale delle vendite per ogni città, ordinato per totale in modo decrescente.
 
-```json
+```js
 db.orders.aggregate([
   { $match: { status: "completed" } },
   { $unwind: "$items" },
