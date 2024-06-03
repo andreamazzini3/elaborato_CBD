@@ -3,9 +3,5 @@ data/
 .vscode/
 Thumbs.db
 
-# igore jsonfile
-general_contract_db*.*
-combined_*.*
+*.json
 
-#ignore docker 
-docker*
