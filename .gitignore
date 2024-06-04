@@ -3,8 +3,12 @@ data/
 .vscode/
 Thumbs.db
 
+# not-ignore
+backup/**
+backup/
 *.json
 json/
 
+.env
 __pycache__/
 **/__pycache__/

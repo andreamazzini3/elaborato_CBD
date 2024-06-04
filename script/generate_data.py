@@ -10,7 +10,7 @@ from data import *
 from schema import *
 
 MAX_ATTACHEMNT = 400
-MAX_GENERAL_CONTRACT = 1200
+MAX_GENERAL_CONTRACT = 1200 # 50000
 PATH = 'json/'
 
 Path(PATH).mkdir(parents=True, exist_ok=True)
@@ -40,7 +40,7 @@ def generate_pricing_table():
 def generate_embedded_json():
     contracts_embedded = []
 
-    for _ in range(MAX_ATTACHEMNT):
+    for _ in range(MAX_GENERAL_CONTRACT):
         contract_embedded = {
             "contract_date_creation": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
             "contract_date_signature": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
@@ -74,7 +74,7 @@ def generate_embedded_json():
 def generate_reference_json():
     contracts_referencing = []
     attachments_referencing = []
-    for _ in range(MAX_ATTACHEMNT):
+    for _ in range(MAX_GENERAL_CONTRACT):
         contract_referencing = {
             "contract_date_creation": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
             "contract_date_signature": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
@@ -111,5 +111,10 @@ def generate_reference_json():
         json.dump(attachments_referencing, f_out, indent=2)
 
 
+
+print('>>> creating embedded json ...')
 generate_embedded_json()
+print('>>> done.')
+print('>>> creating referencing json ...')
 generate_reference_json()
+print('>>> done.')
