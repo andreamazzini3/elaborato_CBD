@@ -29,6 +29,6 @@ street_types = ["via", "piazza", "viale", "corso", "vicolo", "strada"]
 cities = ["Roma", "Milano", "Torino", "Napoli", "Venezia", "Firenze", "Genova", "Bologna", "Verona", "Padova",
           "Trieste", "Palermo", "Parma", "Catania", "Perugia", "Livorno", "Ravenna", "Modena", "Cagliari", "Ancona"]
 
-services = ['VRENTAL', 'VFLEET', 'VINSURANCE', 'VDRIVER']
-companies = ['HERTZ', 'AVIS', 'VERTI', 'ZITY', 'SHARENOW', 'VANFORYOU', 'ENJOY', 'VEYCORE', 'SASCOM']
+services = ['VRENTAL', 'VFLEET', 'VINSURANCE', 'VDRIVER', 'VSVC', 'VSTART', 'VISA']
+companies = ['HERTZ', 'AVIS', 'VERTI', 'ZITY', 'SHARENOW', 'VANFORYOU', 'ENJOY', 'VEYCORE', 'SASCOM', 'SIUUMCOM', 'PEDRO', 'ESCOBAR']
 

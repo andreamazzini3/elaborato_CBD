@@ -9,8 +9,8 @@ from pathlib import Path
 from data import *
 from schema import *
 
-MAX_ATTACHEMNT = 400
-MAX_GENERAL_CONTRACT = 1200 # 50000
+MAX_ATTACHEMNT = 800
+MAX_GENERAL_CONTRACT = 15000
 PATH = 'json/'
 
 Path(PATH).mkdir(parents=True, exist_ok=True)
@@ -27,7 +27,9 @@ def generate_random_address():
     street = f"{random.choice(street_types)} {random.choice(street_names)} {random.randint(1, 100)}"
     city = random.choice(cities)
     postal_code = ''.join(random.choices(string.digits, k=5))
-    return f"{street}, {postal_code} {city}"
+    return street, city, postal_code
+    # return f"{street}, {postal_code} {city}"
+
 
 def generate_pricing_table():
     return {
@@ -39,14 +41,19 @@ def generate_pricing_table():
 
 def generate_embedded_json():
     contracts_embedded = []
+    count = 0
 
     for _ in range(MAX_GENERAL_CONTRACT):
+        count += 1
+        street, city, postalcode = generate_random_address()
         contract_embedded = {
             "contract_date_creation": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
             "contract_date_signature": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
             "repair_shop_name": generate_random_name(),        
             "repair_shop_p_iva": generate_partita_iva(),
-            "repair_shop_location": generate_random_address(),
+            "repair_shop_street": street,
+            "repair_shop_city": city,
+            "repair_shop_postalcode": postalcode,
             "attachments": []
         }
 
@@ -64,6 +71,7 @@ def generate_embedded_json():
             contract_embedded["attachments"].append(attachment)
 
         contracts_embedded.append(contract_embedded)
+        print('\r' + str(count), end='\r')
 
 
     # Save the embedded contracts data to a JSON file
@@ -74,14 +82,20 @@ def generate_embedded_json():
 def generate_reference_json():
     contracts_referencing = []
     attachments_referencing = []
+    count = 0
+
     for _ in range(MAX_GENERAL_CONTRACT):
+        count += 1
+        street, city, postalcode = generate_random_address()
         contract_referencing = {
             "contract_date_creation": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
             "contract_date_signature": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
             "repair_shop_name": generate_random_name(),        
             "repair_shop_p_iva": generate_partita_iva(),
-            "repair_shop_location": generate_random_address(),
-            "attachment": []
+            "repair_shop_street": street,
+            "repair_shop_city": city,
+            "repair_shop_postalcode": postalcode,
+            "attachments": []
         }
 
         # Create attachments
@@ -97,10 +111,11 @@ def generate_reference_json():
                 "date_created": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
                 "date_expiration": (datetime.now() - timedelta(days=random.randint(0, 365))).isoformat() + 'Z',
             }
-            contract_referencing["attachment"].append(attachment_id)
+            contract_referencing["attachments"].append(attachment_id)
             attachments_referencing.append(attachment)
 
         contracts_referencing.append(contract_referencing)
+        print('\r' + str(count), end='\r')
 
     # Save the referencing contracts data to a JSON file
     with open(os.path.join(PATH, 'contracts_referencing_data.json'), 'w') as f_out:
@@ -114,7 +129,7 @@ def generate_reference_json():
 
 print('>>> creating embedded json ...')
 generate_embedded_json()
-print('>>> done.')
+print('--- done.')
 print('>>> creating referencing json ...')
 generate_reference_json()
-print('>>> done.')
+print('--- done.')
