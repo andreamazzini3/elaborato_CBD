@@ -1,25 +1,71 @@
 import { MongoClient } from "mongodb";
 
 const URI = 'mongodb://localhost:27017';
+const DB_NAME = '';
 const client = new MongoClient(URI);
 
-function performace_metrics() { }
+const measureExecutionTime = async (label: string, operation: () => Promise<any>) => {
+  const start = process.hrtime();
+  const result = await operation();
+  const end = process.hrtime(start);
+  console.log(`${label} - execution time: ${end[0]}s ${end[1] / 1000000}ms`);
 
-function db(db_name: string) {
+  return result;
+};
+
+async function findOne(db: string, collection: string, query: object) {
   try {
-    const db = client.db(db_name);
-    return db
+    return await client
+      .db(db)
+      .collection(collection)
+      .findOne(query);
   } catch (err) {
     console.log('>>> ERROR: ' + err)
-    return null
+    return null;
   }
 }
 
-const db_emb = db('contracts-embedded')
-const db_ref = db('contracts-referencing')
-
-
-const general_contracts = db_emb.collection('contracts');
-const repair_shop = async (city: string) => {
-  const contracts = await general_contracts.findOne({repair_shop_city: city});
+async function find(db: string, collection: string, query: object) {
+  try {
+    return client
+      .db(db)
+      .collection(collection)
+      .find(query);
+  } catch (err) {
+    console.log('>>> ERROR: ' + err)
+    return null;
+  }
 }
+
+async function create(db: string, collection: string, query: object) {
+  try {
+    return await client
+      .db(db)
+      .collection(collection)
+      .findOne(query);
+  } catch (err) {
+    console.log('>>> ERROR: ' + err)
+    return null;
+  }
+}
+
+async function exec() {
+  await measureExecutionTime(
+    '>>> contracts-embedded: findOne',
+    () => findOne('contracts-embedded', 'contracts', { "attachments.company": 'HERTZ' })
+  )
+
+  await measureExecutionTime(
+    '>>> contracts-embedded: find',
+    () => find('contracts-embedded', 'contracts', { "attachments.company": 'HERTZ' })
+  )
+
+  await measureExecutionTime(
+    '>>> contracts-embedded: create',
+    () => findOne('contracts-embedded', 'contracts', { "attachments.company": 'HERTZ' })
+  )
+  // console.log(contract._id)
+
+}
+
+exec()
