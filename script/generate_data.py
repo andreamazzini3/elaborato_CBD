@@ -2,10 +2,15 @@ import json
 import random
 import string
 import os
+import threading
 
 from datetime import datetime, timedelta
 from bson import ObjectId
 from pathlib import Path
+from atpbar import atpbar, flushing
+
+
+
 from data import *
 from schema import *
 
@@ -43,7 +48,7 @@ def generate_embedded_json():
     contracts_embedded = []
     count = 0
 
-    for _ in range(MAX_GENERAL_CONTRACT):
+    for _ in atpbar(range(MAX_GENERAL_CONTRACT), name='embedded_json'):
         count += 1
         street, city, postalcode = generate_random_address()
         contract_embedded = {
@@ -71,7 +76,7 @@ def generate_embedded_json():
             contract_embedded["attachments"].append(attachment)
 
         contracts_embedded.append(contract_embedded)
-        print('\r' + str(count), end='\r')
+        # print('\r' + str(count), end='\r')
 
 
     # Save the embedded contracts data to a JSON file
@@ -84,7 +89,7 @@ def generate_reference_json():
     attachments_referencing = []
     count = 0
 
-    for _ in range(MAX_GENERAL_CONTRACT):
+    for _ in atpbar(range(MAX_GENERAL_CONTRACT), name='reference_json'):
         count += 1
         street, city, postalcode = generate_random_address()
         contract_referencing = {
@@ -115,7 +120,7 @@ def generate_reference_json():
             attachments_referencing.append(attachment)
 
         contracts_referencing.append(contract_referencing)
-        print('\r' + str(count), end='\r')
+        # print('\r' + str(count), end='\r')
 
     # Save the referencing contracts data to a JSON file
     with open(os.path.join(PATH, 'contracts_referencing_data.json'), 'w') as f_out:
@@ -133,3 +138,18 @@ print('--- done.')
 print('>>> creating referencing json ...')
 generate_reference_json()
 print('--- done.')
+
+# if __name__ =="__main__":
+#     print('>>> creating json ...')
+#     with flushing():
+
+#         t1 = threading.Thread(target=generate_embedded_json)
+#         t2 = threading.Thread(target=generate_reference_json)
+ 
+#         t1.start()
+#         t2.start()
+ 
+#     t1.join()
+#     t2.join()
+ 
+#     print("Done!")

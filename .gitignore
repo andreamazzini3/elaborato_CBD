@@ -6,9 +6,15 @@ Thumbs.db
 # not-ignore
 backup/**
 backup/
-*.json
+# *.json
 json/
 
+
+query/node_modules/**
+query/node_modules/
+
 .env
+.venv/**
+.venv/
 __pycache__/
 **/__pycache__/
