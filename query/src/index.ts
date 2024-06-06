@@ -13,24 +13,25 @@ const measureExecutionTime = async (label: string, operation: () => Promise<any>
   return result;
 };
 
-async function findOne(db: string, collection: string, query: object) {
+async function aggregate(db: string, collection: string, pipeline: object[]) {
   try {
-    return await client
+    return client
       .db(db)
       .collection(collection)
-      .findOne(query);
+      .aggregate(pipeline)
+      .toArray()
   } catch (err) {
     console.log('>>> ERROR: ' + err)
     return null;
   }
 }
 
-async function find(db: string, collection: string, query: object) {
+async function findOne(db: string, collection: string, query: object) {
   try {
     return client
       .db(db)
       .collection(collection)
-      .find(query);
+      .findOne(query);
   } catch (err) {
     console.log('>>> ERROR: ' + err)
     return null;
@@ -50,21 +51,73 @@ async function create(db: string, collection: string, query: object) {
 }
 
 async function exec() {
-  await measureExecutionTime(
+  // find all repairshop with hertz contract
+  const contract = await measureExecutionTime(
     '>>> contracts-embedded: findOne',
-    () => findOne('contracts-embedded', 'contracts', { "attachments.company": 'HERTZ' })
+    () => aggregate('contracts-embedded', 'contracts', [
+      {
+        $unwind: {
+          path: "$attachments"
+        }
+      },
+      {
+        $group: {
+          _id: "$attachments._id",
+          company: { $first: '$attachments.company' },
+          repair_shop_name: { $first: '$repair_shop_name' },
+          repair_shop_p_iva: { $first: '$repair_shop_p_iva' },
+        }
+      },
+      {
+        $match: {
+          "company": "HERTZ"
+        }
+      }
+    ])
   )
 
-  await measureExecutionTime(
-    '>>> contracts-embedded: find',
-    () => find('contracts-embedded', 'contracts', { "attachments.company": 'HERTZ' })
+  const contract_ref = await measureExecutionTime(
+    '>>> contracts-ref: findOne',
+    () => aggregate('contracts-referencing', 'contracts',
+      [
+        {
+          $lookup: {
+            from: "attachments-contracts",
+            localField: "attachments",
+            foreignField: "_id",
+            as: "attachments"
+          }
+        },
+        {
+          $unwind: {
+            path: "$attachments"
+          }
+        },
+        {
+          $group: {
+            _id: "$attachments._id",
+            company: { $first: "$attachments.company" },
+            repair_shop_name: {
+              $first: "$repair_shop_name"
+            },
+            repair_shop_p_iva: {
+              $first: "$repair_shop_p_iva"
+            }
+          }
+        },
+        {
+          $match: {
+            'company': 'HERTZ'
+          }
+        }
+      ]
+    )
   )
 
-  await measureExecutionTime(
-    '>>> contracts-embedded: create',
-    () => findOne('contracts-embedded', 'contracts', { "attachments.company": 'HERTZ' })
-  )
-  // console.log(contract._id)
+
+
+
+  console.log(contract[0])
 
 }
 
