@@ -31,15 +31,32 @@ async function aggregate(db: string, collection: string, pipeline: object[]) {
   }
 }
 
-async function findOne(db: string, collection: string, query: object) {
+async function find(db: string, collection: string, query: object, options?: object) {
   try {
-    return client
+    return await client
       .db(db)
       .collection(collection)
-      .findOne(query);
+      .find(query, options)
+      .toArray();
   } catch (err) {
     console.log('>>> ERROR: ' + err)
     return null;
+  }
+}
+
+async function findAllPagination(db: string, collection: string, skip: number, limit: number) {
+  try {
+    return await client
+      .db(db)
+      .collection(collection)
+      .find()
+      .skip(skip)
+      .limit(limit)
+      .toArray()
+
+  } catch (err) {
+    console.log('>>> ERROR: ' + err);
+
   }
 }
 
@@ -94,8 +111,8 @@ async function exec() {
     {
       $match: {
         company: "HERTZ"
-      }
-    },
+      },
+    }
   ]
 
   const optimize_pipeline_ref = [
@@ -108,9 +125,7 @@ async function exec() {
         pipeline: [
           {
             $match: {
-              company: {
-                $eq: "HERTZ"
-              }
+              company: "HERTZ"
             }
           }
         ]
@@ -130,7 +145,6 @@ async function exec() {
         data: "$contract_date_signature"
       }
     },
-
   ]
 
   const lookup_aggregate = {
@@ -142,28 +156,91 @@ async function exec() {
     }
   }
 
-  // find all repairshop with hertz contract
-  // const contract_emb_optmized = await measureExecutionTime(
-  //   contract_emb_label + ': optimize aggregate',
-  //   () => aggregate('contracts-embedded', 'contracts', optimize_pipeline)
-  // )
-  // const contract_emb_slow = await measureExecutionTime(
-  //   contract_emb_label + ': optimize aggregate',
-  //   () => aggregate('contracts-embedded', 'contracts', slow_pipeline)
-  // )
+  const lookup_aggregate_match = {
+    $lookup: {
+      from: "attachments-contracts",
+      as: "attachments",
+      localField: "attachments",
+      foreignField: "_id",
+      let: {},
+      pipeline: [
+        {
+          $match: {
+            company: {
+              $eq: "HERTZ"
+            }
+          }
+        }
+      ],
 
-  const contract_ref_optmized_2 = await measureExecutionTime(
+    }
+  }
+
+  const pipeline_findall = [
+    {}
+  ]
+
+  // find all repairshop with hertz contract
+  await measureExecutionTime(
+    contract_emb_label + ': optimize aggregate',
+    () => aggregate('contracts-embedded', 'contracts', optimize_pipeline)
+  )
+  await measureExecutionTime(
+    contract_emb_label + ': optimize aggregate',
+    () => aggregate('contracts-embedded', 'contracts', slow_pipeline)
+  )
+
+  await measureExecutionTime(
     contract_ref_label + ': optimize aggregate',
     () => aggregate('contracts-referencing', 'general-contracts', optimize_pipeline_ref)
   )
-  const contract_ref_optmized = await measureExecutionTime(
+  await measureExecutionTime(
     contract_ref_label + ': optimize aggregate',
     () => aggregate('contracts-referencing', 'general-contracts', [lookup_aggregate, ...optimize_pipeline])
   )
-  const contract_ref_slow = await measureExecutionTime(
-    contract_ref_label + ': optimize aggregate',
+  await measureExecutionTime(
+    contract_ref_label + ': slow aggregate',
     () => aggregate('contracts-referencing', 'general-contracts', [lookup_aggregate, ...slow_pipeline])
   )
+
+  await measureExecutionTime(
+    contract_emb_label + ': find with projection and limit',
+    () => find('contracts-embedded', 'contracts', {}, { projection: { attachments: 0 }, limit: 1000 })
+  )
+  await measureExecutionTime(
+    contract_emb_label + ': find with limit',
+    () => find('contracts-embedded', 'contracts', {}, { limit: 1000 })
+  )
+  await measureExecutionTime(
+    contract_emb_label + ': findAll',
+    () => find('contracts-embedded', 'contracts', {})
+  )
+
+  console.log(contract_emb_label + ': findAll with paging ...');
+  await measureExecutionTime(
+    contract_emb_label + ': findAll paging ',
+    async () => {
+      const page_lentgh = 300
+      let documents: object[] = []
+      for (let count = 0; count < 15000; count += page_lentgh) {
+        let doc = await measureExecutionTime(
+          FgCyan + '   ⤷ page: ' + Reset + count,
+          () => findAllPagination('contracts-embedded', 'contracts', count, page_lentgh)
+        )
+
+        documents = [...documents, ...doc]
+      }
+
+      console.log(FgCyan + '   ⤷ doc_lenght: ' + Reset + documents.length)
+      // console.log(FgCyan + 'doc[0]: ' + Reset + JSON.stringify(documents[0]))
+    }
+  )
+
+
+  // console.log(contract_emb_findOne[0]);
+
+
+  await client.close();
 
 }
 
