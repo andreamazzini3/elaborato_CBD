@@ -1,8 +1,13 @@
 import { MongoClient } from "mongodb";
 
 const URI = 'mongodb://localhost:27017';
-const DB_NAME = '';
 const client = new MongoClient(URI);
+
+const FgYellow = "\x1b[33m";
+const FgCyan = "\x1b[36m"
+const Reset = "\x1b[0m"
+const contract_ref_label = FgYellow + '⇒ contracts-ref' + Reset
+const contract_emb_label = FgCyan + '↪ contracts-emb' + Reset
 
 const measureExecutionTime = async (label: string, operation: () => Promise<any>) => {
   const start = process.hrtime();
@@ -51,74 +56,116 @@ async function create(db: string, collection: string, query: object) {
 }
 
 async function exec() {
-  // find all repairshop with hertz contract
-  const contract = await measureExecutionTime(
-    '>>> contracts-embedded: findOne',
-    () => aggregate('contracts-embedded', 'contracts', [
-      {
-        $unwind: {
-          path: "$attachments"
-        }
-      },
-      {
-        $group: {
-          _id: "$attachments._id",
-          company: { $first: '$attachments.company' },
-          repair_shop_name: { $first: '$repair_shop_name' },
-          repair_shop_p_iva: { $first: '$repair_shop_p_iva' },
-        }
-      },
-      {
-        $match: {
-          "company": "HERTZ"
-        }
+  const slow_pipeline = [
+    {
+      $unwind: {
+        path: "$attachments"
       }
-    ])
-  )
+    },
+    {
+      $group: {
+        _id: "$attachments._id",
+        company: { $first: '$attachments.company' },
+        repair_shop_name: { $first: '$repair_shop_name' },
+        repair_shop_p_iva: { $first: '$repair_shop_p_iva' },
+      }
+    },
+    {
+      $match: {
+        company: "HERTZ"
+      }
+    }
+  ]
 
-  const contract_ref = await measureExecutionTime(
-    '>>> contracts-ref: findOne',
-    () => aggregate('contracts-referencing', 'contracts',
-      [
-        {
-          $lookup: {
-            from: "attachments-contracts",
-            localField: "attachments",
-            foreignField: "_id",
-            as: "attachments"
-          }
-        },
-        {
-          $unwind: {
-            path: "$attachments"
-          }
-        },
-        {
-          $group: {
-            _id: "$attachments._id",
-            company: { $first: "$attachments.company" },
-            repair_shop_name: {
-              $first: "$repair_shop_name"
-            },
-            repair_shop_p_iva: {
-              $first: "$repair_shop_p_iva"
+  const optimize_pipeline = [
+    {
+      $unwind: {
+        path: "$attachments"
+      }
+    },
+    {
+      $project: {
+        _id: "$attachments._id",
+        company: "$attachments.company",
+        repair_shop_name: "$repair_shop_name",
+        repair_shop_p_iva: "$repair_shop_p_iva"
+      }
+    },
+    {
+      $match: {
+        company: "HERTZ"
+      }
+    },
+  ]
+
+  const optimize_pipeline_ref = [
+    {
+      $lookup: {
+        from: "attachments-contracts",
+        as: "attachments",
+        localField: "attachments",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $match: {
+              company: {
+                $eq: "HERTZ"
+              }
             }
           }
-        },
-        {
-          $match: {
-            'company': 'HERTZ'
-          }
-        }
-      ]
-    )
+        ]
+      }
+    },
+    {
+      $unwind: {
+        path: "$attachments"
+      }
+    },
+    {
+      $project: {
+        _id: "$attachments._id",
+        company: "$attachments.company",
+        repair_shop_name: "$repair_shop_name",
+        repair_shop_p_iva: "$repair_shop_p_iva",
+        data: "$contract_date_signature"
+      }
+    },
+
+  ]
+
+  const lookup_aggregate = {
+    $lookup: {
+      from: "attachments-contracts",
+      localField: "attachments",
+      foreignField: "_id",
+      as: "attachments"
+    }
+  }
+
+  // find all repairshop with hertz contract
+  // const contract_emb_optmized = await measureExecutionTime(
+  //   contract_emb_label + ': optimize aggregate',
+  //   () => aggregate('contracts-embedded', 'contracts', optimize_pipeline)
+  // )
+  // const contract_emb_slow = await measureExecutionTime(
+  //   contract_emb_label + ': optimize aggregate',
+  //   () => aggregate('contracts-embedded', 'contracts', slow_pipeline)
+  // )
+
+  const contract_ref_optmized_2 = await measureExecutionTime(
+    contract_ref_label + ': optimize aggregate',
+    () => aggregate('contracts-referencing', 'general-contracts', optimize_pipeline_ref)
   )
-
-
-
-
-  console.log(contract[0])
+  const contract_ref_optmized = await measureExecutionTime(
+    contract_ref_label + ': optimize aggregate',
+    () => aggregate('contracts-referencing', 'general-contracts', [lookup_aggregate, ...optimize_pipeline])
+  )
+  const contract_ref_slow = await measureExecutionTime(
+    contract_ref_label + ': optimize aggregate',
+    () => aggregate('contracts-referencing', 'general-contracts', [lookup_aggregate, ...slow_pipeline])
+  )
 
 }
 
+console.log(' ')
 exec()
