@@ -75,8 +75,8 @@ export const new_contracts = [
   }
 ]
 
-interface Attachment {
-  _id: string;
+export interface Attachment {
+  _id?: string;
   service: string;
   company: string;
   pricing_table: {

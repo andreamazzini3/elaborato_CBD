@@ -4,7 +4,6 @@ import {
   contract_emb_label,
   contract_ref_label,
   FgCyan,
-  FgYellow,
   Reset
 } from '../common/shared';
 
