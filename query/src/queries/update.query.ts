@@ -1,8 +1,7 @@
 import { client, measureExecutionTime, contract_emb_label, contract_ref_label, DB_EMB, DB_REF } from '../common/shared';
 import { create } from './create.query';
-import { Attachment, attachments, attachments2, attachments3 } from '../common/data';
+import { Attachment, attachments } from '../common/data';
 import { ObjectId } from 'mongodb';
-import { count } from 'console';
 
 async function update(db: string, collection: string, filter: object, documents: object, options?: object) {
   try {
@@ -34,6 +33,7 @@ export async function exec() {
   const contract_ref_id = '6661778c54ad5bafdce4c8b4'
   let attachment = attachments[0]
 
+  // ↓ clear data ↓
   await update(
     DB_EMB.db,
     DB_EMB.collection,
@@ -70,33 +70,34 @@ export async function exec() {
   }
 
   console.log(contract_ref_label + ': insert Attachements')
-  new_attachment.length = 0
-  for (let i = 0; i <= 2000; i += 200) {
-    for (let count = 0; count < i; count++) {
-      attachment.date_created = Date.now().toString();
-      attachment._id = (new ObjectId()).toString()
-      new_attachment.push(attachment)
-    }
+  // new_attachment.length = 0
+  // for (let i = 0; i <= 2000; i += 200) {
+  //   for (let count = 0; count < i; count++) {
+  //     attachment.date_created = Date.now().toString();
+  //     attachment._id = (new ObjectId()).toString()
+  //     // console.log(attachment._id)
+  //     new_attachment.push(attachment)
+  //   }
 
-    await measureExecutionTime(
-      '  ' + contract_ref_label + ': insert Attachements [ ' + i + ' ]',
-      async () => {
-        const attachment_ids = new_attachment.map(attachment => attachment._id)
+  //   await measureExecutionTime(
+  //     '  ' + contract_ref_label + ': insert Attachements [ ' + i + ' ]',
+  //     async () => {
+  //       const attachment_ids = new_attachment.map(attachment => attachment._id)
 
-        await create(
-          DB_REF.db,
-          DB_REF.collection_attachments,
-          new_attachment
-        )
+  //       await create(
+  //         DB_REF.db,
+  //         DB_REF.collection_attachments,
+  //         new_attachment
+  //       )
 
-        await update(
-          DB_REF.db,
-          DB_REF.collection_general,
-          { _id: new ObjectId(contract_ref_id) },
-          { $push: { attachments: { $each: attachment_ids } } }
-        )
+  //       await update(
+  //         DB_REF.db,
+  //         DB_REF.collection_general,
+  //         { _id: new ObjectId(contract_ref_id) },
+  //         { $push: { attachments: { $each: attachment_ids } } }
+  //       )
 
-      }
-    )
-  }
+  //     }
+  //   )
+  // }
 }

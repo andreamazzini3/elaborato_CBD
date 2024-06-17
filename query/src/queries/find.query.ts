@@ -139,7 +139,7 @@ export async function exec() {
     () => aggregate('contracts-embedded', 'contracts', optimize_pipeline)
   )
   await measureExecutionTime(
-    contract_emb_label + ': optimize aggregate',
+    contract_emb_label + ': solw aggregate',
     () => aggregate('contracts-embedded', 'contracts', slow_pipeline)
   )
 

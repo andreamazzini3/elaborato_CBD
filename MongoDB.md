@@ -357,6 +357,67 @@ L'aggregazione di MongoDB è uno strumento potente che permette di eseguire anal
 ---
 ## Ottimizzazione Delle Query
 
+- [ ] TODO: !
+
+Per analizzare le query in mongodb ho strutturato un esempio di db, basato su un caso reale. Ho preso come esempio database di contratti tra una azienda intermediaria e delle officine, dove possiamo indivudare due entità: 
+- un **contratto generale** che è l'entità che definisce il contratto tra l'officina e l'azienda intermediaria.
+- un **allegato** che è un estensione del contratto generale tra l'officna e altre aziende terze che offrono all'officina di trovargli clienti tramite l'azienda che fa da intermediario del contratto generale. 
+
+Schema della struttura del Database: [[Schema ER.canvas|Schema ER]]
+![[Pasted image 20240617152517.png]]
+Creo così due database con un design dello schema diverso, embedded e reference:
+- [ ] TODO: definire tutte le collection !!
+
+```json
+{
+  _id: string,
+  service: string,
+  company: string,
+  pricing_table: {
+    price_1: number,
+    price_2: number,
+    price_3: number,
+  },
+  date_signature: string,
+  date_created: string,
+  date_expiration: string,
+}
+```
+
+### Find Query
+
+in questo caso l'obiettivo della query è quello di trovare tutte le officine che hanno un contratto allegato con un azienda specifica che in questo è `HERTZ`
+
+E' possibile fare la query e ottenere i dati che mi interessano utilizzando una pipeline di aggregazione: 
+
+```js
+client
+	.contracts_embedded
+	.general_contracs
+	.aggregate([
+	  {
+	    $unwind: {
+	      path: "$attachments"
+	    }
+	  },
+	  {
+	    $group: {
+	      _id: "$attachments._id",
+	      company: { $first: '$attachments.company' },
+	      repair_shop_name: { $first: '$repair_shop_name' },
+	      repair_shop_p_iva: { $first: '$repair_shop_p_iva' },
+	    }
+	  },
+	  {
+	    $match: {
+	      company: "HERTZ"
+	    }
+	  }
+	])
+
+```
+
+
 
 
 

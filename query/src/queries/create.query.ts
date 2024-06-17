@@ -32,5 +32,6 @@ export async function exec() {
       await create(DB_REF.db, DB_REF.collection_attachments, attachments)
     }
   )
+
 }
 
