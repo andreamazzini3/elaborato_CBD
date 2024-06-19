@@ -364,7 +364,9 @@ Per analizzare le query in mongodb ho strutturato un esempio di db, basato su un
 - un **allegato** che è un estensione del contratto generale tra l'officna e altre aziende terze che offrono all'officina di trovargli clienti tramite l'azienda che fa da intermediario del contratto generale. 
 
 Schema della struttura del Database: [[Schema ER.canvas|Schema ER]]
+
 ![[Pasted image 20240617152517.png]]
+
 Creo così due database con un design dello schema diverso, embedded e reference:
 - [ ] TODO: definire tutte le collection !!
 
@@ -384,14 +386,17 @@ Creo così due database con un design dello schema diverso, embedded e reference
 }
 ```
 
-### Find Query
+
+---
+
+### Find Aggreagate Query 
 
 in questo caso l'obiettivo della query è quello di trovare tutte le officine che hanno un contratto allegato con un azienda specifica che in questo è `HERTZ`
 
 E' possibile fare la query e ottenere i dati che mi interessano utilizzando una pipeline di aggregazione: 
 
 ```js
-client
+db
 	.contracts_embedded
 	.general_contracs
 	.aggregate([
@@ -419,7 +424,40 @@ client
 
 
 
+**PARAGONE TRA REFERENCING E EMBEDDING**
+
+chart !!
+
+### Update Query
+
+> Descrizione generale !!
+
+- Embedding:
+	 → mettere esempio di query !!
+- Referencing:
+	 → mettere esempio di query !!
+
+**PARAGONE TRA REFERENCING E EMBEDDING**
+
+chart !!
+
+
+## Problematiche con emebedded !!
+
+### Update/delete only Attachemnet Query
+
+> Descrizione generale del problema !!
+
+```
+codice query !!
+```
+
+**PARAGONE TRA REFERENCING E EMBEDDING**
+
+chart !!
 
 
 
+---
 
+Fine !!
